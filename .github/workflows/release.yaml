@@ -47,7 +47,7 @@ jobs:
           pack build ${IMAGE}:${GITHUB_REF_NAME} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish
         shell: bash
         env:
-          IMAGE: ghcr.io/${GITHUB_REPOSITORY_OWNER}/guac
+          IMAGE: ghcr.io/${{ env.GITHUB_REPOSITORY_OWNER }}/guac
           BUILDER: paketobuildpacks/builder:base
           BUILDPACK: paketo-buildpacks/nodejs 
           # BP_GO_TARGETS: "./cmd/collector:./cmd/guacone:./cmd/ingest:./cmd/graphql_playground"
