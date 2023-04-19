@@ -56,7 +56,8 @@ jobs:
         # with:
         #   # sbom-artifact-match: "/tmp/sbom/.*\\.spdx\\.json$"
         #   sbom-artifact-match: "/tmp/sbom/launch/paketo-buildpacks_yarn-install/launch-modules/.*\\.spdx\\.json$"
-      # - name: SBOM upload 
-      #   uses: advanced-security/spdx-dependency-submission-action@v0.0.1
-      #   with:
-      #     filePath: "_manifest/spdx_2.2/"
+      - run: ls -la /tmp/sbom/launch/paketo-buildpacks_yarn-install/launch-modules/
+      - name: SBOM upload 
+        uses: advanced-security/spdx-dependency-submission-action@v0.0.1
+        with:
+          filePath: "/tmp/sbom/launch/paketo-buildpacks_yarn-install/launch-modules/"
