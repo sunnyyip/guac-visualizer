@@ -61,4 +61,4 @@ jobs:
       - name: SBOM upload 
         uses: advanced-security/spdx-dependency-submission-action@v0.0.1
         with:
-          filePath: "/tmp/sbom/launch/paketo-buildpacks_yarn-install/launch-modules/"
+          filePath: "sbom-output-dir/launch/paketo-buildpacks_yarn-install/launch-modules/"
