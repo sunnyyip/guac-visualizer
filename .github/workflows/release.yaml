@@ -25,6 +25,7 @@ on:
 
 permissions:
   packages: write # To publish container images to GHCR
+  contents: write # Test uploading sbom
 
 jobs:
   build-image-on-release:
