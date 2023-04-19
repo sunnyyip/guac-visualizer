@@ -45,7 +45,7 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-          pack build ${IMAGE} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish --sbom-output-dir /tmp/sbom
+          pack build ${IMAGE} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish --sbom-output-dir sbom-output-dir
         shell: bash
         env:
           IMAGE: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
@@ -53,8 +53,9 @@ jobs:
           BUILDPACK: paketo-buildpacks/nodejs 
 
       - uses: anchore/sbom-action/publish-sbom@v0
-        with:
-          sbom-artifact-match: "/tmp/sbom/.*\\.spdx\\.json$"
+        # with:
+        #   # sbom-artifact-match: "/tmp/sbom/.*\\.spdx\\.json$"
+        #   sbom-artifact-match: "/tmp/sbom/launch/paketo-buildpacks_yarn-install/launch-modules/.*\\.spdx\\.json$"
       # - name: SBOM upload 
       #   uses: advanced-security/spdx-dependency-submission-action@v0.0.1
       #   with:
