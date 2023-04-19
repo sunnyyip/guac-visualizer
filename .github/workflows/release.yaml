@@ -21,7 +21,7 @@ name: release-guac-visualizer-image
 on:
   push:
     branches:
-      - '*''
+      - '*'
 
 permissions:
   packages: write # To publish container images to GHCR
