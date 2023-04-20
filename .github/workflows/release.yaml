@@ -14,14 +14,10 @@
 # limitations under the License.
 name: release-guac-visualizer-image
 
-# on:
-#   push:
-#     tags:
-#       - '*'
 on:
   push:
-    branches:
-      - '*'
+    tags:
+      - 'v*'
 
 permissions:
   packages: write # To publish container images to GHCR
