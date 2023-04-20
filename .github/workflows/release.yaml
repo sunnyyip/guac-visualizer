@@ -41,10 +41,12 @@ jobs:
           registry: ghcr.io
           username: ${GITHUB_WORKFLOW}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: setup pack 
+      - name: Setup pack 
         uses: buildpacks/github-actions/setup-pack@7fc3d673350db0fff960cc94a3b9b80e5b663ae2 # v5.0.0
-      - name: Install Cosign
+      - name: Install cosign
         uses: sigstore/cosign-installer@main
+      - name: Install crane
+        uses: imjasonh/setup-crane@v0.1
 
       - name: Build and publish image
         run: |
