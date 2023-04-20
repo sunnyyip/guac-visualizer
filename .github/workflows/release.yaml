@@ -32,6 +32,12 @@ jobs:
   build-image-on-release:
     name: Build and publish image
     runs-on: ubuntu-latest
+    env:
+      IMAGE_URI: ghcr.io/${{ github.repository }}
+      BUILDER: paketobuildpacks/builder:base
+      BUILDPACK: paketo-buildpacks/nodejs 
+      BUILDPACK_SBOM_OUTPUT_DIR: sbom-output-dir
+      BUILDPACK_SPDX_SBOM: "launch/paketo-buildpacks_yarn-install/launch-modules/sbom.spdx.json"
     steps:
       - name: Checkout code
         uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # tag=v3
@@ -39,7 +45,7 @@ jobs:
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
         with:
           registry: ghcr.io
-          username: ${GITHUB_WORKFLOW}
+          username: ${{ github.actor }} 
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup pack 
         uses: buildpacks/github-actions/setup-pack@7fc3d673350db0fff960cc94a3b9b80e5b663ae2 # v5.0.0
@@ -47,34 +53,22 @@ jobs:
         uses: sigstore/cosign-installer@main
       - name: Install crane
         uses: imjasonh/setup-crane@v0.1
-
       - name: Build and publish image
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
           pack build ${IMAGE_URI}:${{ github.ref_name }} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR}
-          DIGEST=$(crane digest ${IMAGE_URI}:${{ github.ref_name }})
-          IMAGE_URI_DIGEST=${IMAGE_URI}@${DIGEST}
+          echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI}:${{ github.ref_name }})\n" >> $GITHUB_OUTPUT
+      - name: Sign and verify image
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
           cosign sign -a git_sha=$GITHUB_SHA ${IMAGE_URI_DIGEST} --yes
           cosign attach sbom --sbom ${BUILDPACK_SBOM_OUTPUT_DIR}/${BUILDPACK_SPDX_SBOM} ${IMAGE_URI_DIGEST}
           cosign sign -a git_sha=$GITHUB_SHA --attachment sbom ${IMAGE_URI_DIGEST} --yes
-          cosign verify ${IMAGE_URI_DIGEST} --certificate-oidc-issuer ${GITHUB_ACITONS_ISSUER} --certificate-identity ${COSIGN_KEYLESS_CERT_SUBJECT}
-
+          cosign verify ${IMAGE_URI_DIGEST} --certificate-oidc-issuer ${GITHUB_ACITONS_OIDC_ISSUER} --certificate-identity ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}
         shell: bash
         env:
-          IMAGE_URI: ghcr.io/${{ github.repository }}
-          BUILDER: paketobuildpacks/builder:base
-          BUILDPACK: paketo-buildpacks/nodejs 
-          BUILDPACK_SBOM_OUTPUT_DIR: sbom-output-dir
-          BUILDPACK_SPDX_SBOM: "launch/paketo-buildpacks_yarn-install/launch-modules/sbom.spdx.json"
-          GITHUB_ACITONS_ISSUER: https://token.actions.githubusercontent.com
-          COSIGN_KEYLESS_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/release.yaml@${{ github.ref }}
-          # https://github.com/viccuad/app-example/.github/workflows/ci.yml@refs/tags/v0.1.0
-          
-
-      # - uses: anchore/sbom-action/publish-sbom@v0
-
-      # - name: SBOM upload 
-      #   uses: advanced-security/spdx-dependency-submission-action@v0.0.1
-      #   with:
-      #     filePath: "sbom-output-dir/launch/paketo-buildpacks_yarn-install/launch-modules/"
+          IMAGE_URI_DIGEST: ${{IMAGE_URI}}@${{ steps.build_and_publish_image.outputs.IMAGE_DIGEST }}
+          GITHUB_ACITONS_OIDC_ISSUER: https://token.actions.githubusercontent.com
+          COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/release.yaml@${{ github.ref }}
