@@ -25,7 +25,6 @@ on:
 
 permissions:
   packages: write # To publish container images to GHCR
-  contents: write # Test uploading sbom
   id-token: write # needed for signing the images with GitHub OIDC Token **not production ready**
 
 jobs:
