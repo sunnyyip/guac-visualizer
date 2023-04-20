@@ -58,7 +58,8 @@ jobs:
           cosign sign -a git_sha=$GITHUB_SHA ${IMAGE_URI_DIGEST} --yes
           cosign attach sbom --sbom ${BUILDPACK_SBOM_OUTPUT_DIR}/${BUILDPACK_SPDX_SBOM} ${IMAGE_URI_DIGEST}
           cosign sign -a git_sha=$GITHUB_SHA --attachment sbom ${IMAGE_URI_DIGEST} --yes
-          cosign verify ${IMAGE_URI_DIGEST}
+          cosign verify ${IMAGE_URI_DIGEST} --certificate-oidc-issuer ${GITHUB_ACITONS_ISSUER} --certificate-identity ${COSIGN_KEYLESS_CERT_SUBJECT}
+
         shell: bash
         env:
           IMAGE_URI: ghcr.io/${{ github.repository }}
@@ -66,7 +67,10 @@ jobs:
           BUILDPACK: paketo-buildpacks/nodejs 
           BUILDPACK_SBOM_OUTPUT_DIR: sbom-output-dir
           BUILDPACK_SPDX_SBOM: "launch/paketo-buildpacks_yarn-install/launch-modules/sbom.spdx.json"
-          COSIGN_EXPERIMENTAL: 1
+          GITHUB_ACITONS_ISSUER: https://token.actions.githubusercontent.com
+          COSIGN_KEYLESS_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/release.yaml@${{ github.ref }}
+          # https://github.com/viccuad/app-example/.github/workflows/ci.yml@refs/tags/v0.1.0
+          
 
       # - uses: anchore/sbom-action/publish-sbom@v0
 
