@@ -69,6 +69,6 @@ jobs:
           cosign verify ${IMAGE_URI_DIGEST} --certificate-oidc-issuer ${GITHUB_ACITONS_OIDC_ISSUER} --certificate-identity ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}
         shell: bash
         env:
-          IMAGE_URI_DIGEST: ${{IMAGE_URI}}@${{ steps.build_and_publish_image.outputs.IMAGE_DIGEST }}
+          IMAGE_URI_DIGEST: ${{ env.IMAGE_URI }}@${{ steps.build_and_publish_image.outputs.IMAGE_DIGEST }}
           GITHUB_ACITONS_OIDC_ISSUER: https://token.actions.githubusercontent.com
           COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/release.yaml@${{ github.ref }}
