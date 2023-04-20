@@ -50,18 +50,20 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-          pack build ${IMAGE}:${{ github.ref_name }} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR}
-          DIGEST=$(crane digest ${IMAGE}:${{ github.ref_name }})
-          cosign sign -a git_sha=$GITHUB_SHA ${IMAGE}:${DIGEST}
-          cosign attach sbom --sbom ${BUILDPACK_SBOM_OUTPUT_DIR}/${BUILDPACK_SBOM_PATH} ${IMAGE}:${DIGEST}
-          cosign verify ${IMAGE}:${DIGEST}
+          pack build ${IMAGE_URI}:${{ github.ref_name }} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR}
+          DIGEST=$(crane digest ${IMAGE_URI}:${{ github.ref_name }})
+          IMAGE_URI_DIGEST=${IMAGE}@${DIGEST}
+          cosign sign -a git_sha=$GITHUB_SHA ${IMAGE_URI_DIGEST}
+          cosign attach sbom --sbom ${BUILDPACK_SBOM_OUTPUT_DIR}/${BUILDPACK_SBOM_PATH} ${IMAGE_URI_DIGEST}
+          cosign verify ${IMAGE_URI_DIGEST}
         shell: bash
-          IMAGE: ghcr.io/${{ github.repository }}
+        env:
+          IMAGE_URI: ghcr.io/${{ github.repository }}
           BUILDER: paketobuildpacks/builder:base
           BUILDPACK: paketo-buildpacks/nodejs 
           BUILDPACK_SBOM_OUTPUT_DIR: sbom-output-dir
           BUILDPACK_SPDX_SBOM: "launch/paketo-buildpacks_yarn-install/launch-modules/sbom.spdx.json"
-          # COSIGN_EXPERIMENTAL: 1
+          COSIGN_EXPERIMENTAL: 1
 
       # - uses: anchore/sbom-action/publish-sbom@v0
 
