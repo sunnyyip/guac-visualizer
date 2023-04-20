@@ -55,7 +55,7 @@ jobs:
           pack build ${IMAGE_URI}:${{ github.ref_name }} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR}
           DIGEST=$(crane digest ${IMAGE_URI}:${{ github.ref_name }})
           IMAGE_URI_DIGEST=${IMAGE_URI}@${DIGEST}
-          cosign sign -a git_sha=$GITHUB_SHA ${IMAGE_URI_DIGEST}
+          cosign sign -a git_sha=$GITHUB_SHA ${IMAGE_URI_DIGEST} --yes
           cosign attach sbom --sbom ${BUILDPACK_SBOM_OUTPUT_DIR}/${BUILDPACK_SBOM_PATH} ${IMAGE_URI_DIGEST}
           cosign verify ${IMAGE_URI_DIGEST}
         shell: bash
